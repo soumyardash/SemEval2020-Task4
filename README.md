@@ -8,6 +8,8 @@ This repository gives a Pytorch implementation of the method in the system descr
 - Python3.5 (or higher)
 - Pytorch 1.5.1
 - numpy
+- transformers
+- csv
 
 ## Installation
 
