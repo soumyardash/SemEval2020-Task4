@@ -1,2 +1,2 @@
-# SemEval2020-Task4
-Special Topics in Natural Language Processing
+# **C**ommon **S**ense **Net at SemEval2020-Task4**
+## Siamese BERT for ComVE
