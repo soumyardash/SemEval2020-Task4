@@ -20,6 +20,7 @@ pip install transformers
 ## Citation
 If our method is useful for your research, please consider citing:
 
+```bash
   @inproceedings{wangsemeval,
       title = "{S}em{E}val-2020 Task 4: Commonsense Validation and Explanation",
       author = "Wang, Cunxiang  and
@@ -32,3 +33,4 @@ If our method is useful for your research, please consider citing:
       year = "2020",
       publisher = "Association for Computational Linguistics",
   }
+```

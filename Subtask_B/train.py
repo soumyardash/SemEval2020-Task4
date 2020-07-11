@@ -11,7 +11,7 @@ import datetime
 import numpy as np
 
 from model import CVEclassifier
-from dataset import CVEdatasetA
+from dataset import CVEdatasetB
 
 # Function to calculate the accuracy of our predictions vs labels
 def flat_accuracy(preds, labels):
@@ -74,13 +74,15 @@ def train(model, criterion, optimizer, scheduler, train_dataloader, val_dataload
             # unpack the batch received from train_dataloader
             b_input_id1 = batch[0].to(device)
             b_input_id2 = batch[1].to(device)
-            b_input_mask1 = batch[2].to(device)
-            b_input_mask2 = batch[3].to(device)
-            b_labels = batch[4].to(device)
+            b_input_id3 = batch[2].to(device)
+            b_input_mask1 = batch[3].to(device)
+            b_input_mask2 = batch[4].to(device)
+            b_input_mask3 = batch[5].to(device)
+            b_labels = batch[6].to(device)
 
             model.zero_grad()        
 
-            outputs = model(b_input_id1, b_input_id2, b_input_mask1, b_input_mask2)
+            outputs = model(b_input_id1, b_input_id2, b_input_id3, b_input_mask1, b_input_mask2, b_input_mask3)
 
             loss = criterion(outputs, torch.argmax(b_labels, dim=1))
 
@@ -105,7 +107,7 @@ def train(model, criterion, optimizer, scheduler, train_dataloader, val_dataload
         loss_values.append(avg_train_loss)
 
         print("")
-        print("  Average training loss: {0:.4f}".format(avg_train_loss))
+        print("  Average training loss: {0:.2f}".format(avg_train_loss))
         print("  Training epoch took: {:}".format(format_time(time.time() - t0)))
 
         # ========================================
@@ -129,17 +131,18 @@ def train(model, criterion, optimizer, scheduler, train_dataloader, val_dataload
         eval_loss, eval_accuracy = 0, 0
         nb_eval_steps, nb_eval_examples = 0, 0
 
+        # Evaluate data for one epoch
         for batch in val_dataloader:
 
             # Add batch to GPU
             batch = tuple(t.to(device) for t in batch)
 
-            b_input_id1, b_input_id2, b_input_mask1, b_input_mask2, b_labels, _ = batch
+            b_input_id1, b_input_id2, b_input_id3, b_input_mask1, b_input_mask2, b_input_mask3, b_labels, _ = batch
             
             # Telling the model not to compute or store gradients, saving memory and
             # speeding up validation
             with torch.no_grad():        
-                logits = model(b_input_id1, b_input_id2, b_input_mask1, b_input_mask2)
+                logits = model(b_input_id1, b_input_id2, b_input_id3, b_input_mask1, b_input_mask2, b_input_mask3)
             
             # Calculate loss for the batch
             loss = criterion(logits, torch.argmax(b_labels, dim=1))
@@ -173,13 +176,13 @@ def train(model, criterion, optimizer, scheduler, train_dataloader, val_dataload
                     'optimizer_state_dict':optimizer.state_dict(),
                      'scheduler_state_dict':scheduler.state_dict()}
     
-    torch.save(chkpt_dict, '../weights/'+'stA-roberta-ep-'+str(epoch_i+1)+'-vacc-'+str((100*eval_accuracy/nb_eval_steps))+'.pt')
+    torch.save(chkpt_dict, '../weights/'+'stB-roberta-ep-'+str(epoch_i+1)+'-vacc-'+str((100*eval_accuracy/nb_eval_steps))+'.pt')
     
     print("")
     print("Training complete!")
 
 if __name__=='__main__':
-    parser = argparse.ArgumentParser(description='subtask-A')  
+    parser = argparse.ArgumentParser(description='subtask-B')  
     parser.add_argument('--data-root', type=str, default='../Data/SemEval2020-Task4-Commonsense-Validation-and-Explanation/')                              
     parser.add_argument('--batch-size', type=int, default=32)
     parser.add_argument('--epochs', type=int, default=3)
@@ -187,7 +190,7 @@ if __name__=='__main__':
     parser.add_argument('--eps', type=float, default=1e-8)
     parser.add_argument('--chkpt-path', type=str)
     args = parser.parse_args()
-    
+
     if torch.cuda.is_available():    
         device = torch.device("cuda")
         print('There are %d GPU(s) available.' % torch.cuda.device_count())
@@ -196,13 +199,13 @@ if __name__=='__main__':
         print('No GPU available, using the CPU instead.')
         device = torch.device("cpu")
     
-    trainset = CVEdatasetA(root=os.path.join(args.data_root, 'Training_Data'))
-    valset = CVEdatasetA(root=os.path.join(args.data_root, 'Dev_Data'))
+    trainset = CVEdatasetB(root=os.path.join(args.data_root, 'Training_Data'))
+    valset = CVEdatasetB(root=os.path.join(args.data_root, 'Dev_Data'))
     
     # Training logs
-    os.makedirs('../logs/', exist_ok=True)
+    os.makedirs('drive/My Drive/sem_eval/logs/', exist_ok=True)
     # Weight checkpoint
-    os.makedirs('../weights/', exist_ok=True)
+    os.makedirs('drive/My Drive/sem_eval/weights/', exist_ok=True)
     
     #Creating intsances of training and validation dataloaders
     train_dataloader = DataLoader(trainset, batch_size = args.batch_size, num_workers = 5, shuffle=True)
@@ -231,5 +234,5 @@ if __name__=='__main__':
         scheduler.load_state_dict(chkpt['scheduler_state_dist'])
     
     model.to(device)
-    
+                                       
     train(model, criterion, optimizer, scheduler, train_dataloader, val_dataloader, device, epochs)
