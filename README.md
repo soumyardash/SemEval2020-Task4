@@ -23,6 +23,15 @@ pip install transformers
 If our method is useful for your research, please consider citing:
 
 ```bash
+  @misc{dash2020csnet,
+    title={CS-NET at SemEval-2020 Task 4: Siamese BERT for ComVE},
+    author={Soumya Ranjan Dash and Sandeep Routray and Prateek Varshney and Ashutosh Modi},
+    year={2020},
+    eprint={2007.10830},
+    archivePrefix={arXiv},
+    primaryClass={cs.CL}
+  }
+
   @inproceedings{wangsemeval,
       title = "{S}em{E}val-2020 Task 4: Commonsense Validation and Explanation",
       author = "Wang, Cunxiang  and
